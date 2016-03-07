@@ -33,18 +33,18 @@ class line{
   T operator[](index_t index) const {
     return (_row == index) ?
       3 * (std::numeric_limits<distance_t>::max() / 4):
-      sqrt(std::pow((*_locations_ptr)[_row].first - (*_locations_ptr)[index].first, 2)
-           + std::pow((*_locations_ptr)[_row].second - (*_locations_ptr)[index].second, 2));
+      (int) (sqrt(std::pow((*_locations_ptr)[_row].first - (*_locations_ptr)[index].first, 2)
+                  + std::pow((*_locations_ptr)[_row].second - (*_locations_ptr)[index].second, 2)) + 0.5);
   }
 };
 
 template <class T>
 class matrix{
- private:
+private:
   std::vector<std::pair<double, double>> _locations;
   std::vector<line<T>> _lines;
 
- public:
+public:
   const line<T>& operator[](index_t index) const{
     return _lines[index];
   }

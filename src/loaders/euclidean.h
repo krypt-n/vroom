@@ -1,19 +1,19 @@
 /*
-VROOM (Vehicle Routing Open-source Optimization Machine)
-Copyright (C) 2015, Julien Coupey
+  VROOM (Vehicle Routing Open-source Optimization Machine)
+  Copyright (C) 2015, Julien Coupey
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or (at
-your option) any later version.
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or (at
+  your option) any later version.
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef EUCLIDEAN_H
@@ -21,14 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <regex>
 #include <boost/regex.hpp>
-#include "./problem_io.h"
+#include "../../include/rapidjson/document.h"
 #include "../structures/matrix.h"
 #include "../utils/exceptions.h"
 
 class euclidean{
 
 private:
-  std::vector<std::pair<double, double>> _locations;
+  struct Node {std::size_t index; double x; double y;};
+  
+  std::vector<Node> _locations;
 
   void add_lat_lon_location(const std::string location){
     // Regex check for valid location.
@@ -44,8 +46,7 @@ private:
     std::size_t separator_rank = location.find(",");
     std::string lat = location.substr(4, separator_rank);
     std::string lon = location.substr(separator_rank + 1, location.length() -1);
-    _locations.emplace_back(std::stod(lat, nullptr),
-                            std::stod(lon, nullptr));
+    _locations.push_back({_locations.size(), std::stod(lat, nullptr), std::stod(lon, nullptr)});
   }
   
 public:
@@ -54,7 +55,7 @@ public:
       = (input.find("DIMENSION") == std::string::npos);
 
     if(use_lat_lon_query){
-    // Parsing input in locations from loc=lon,lat&... format.
+      // Parsing input in locations from loc=lon,lat&... format.
       std::size_t start = 0;
       std::size_t end = input.find("&", start);
       while(end != std::string::npos){
@@ -91,7 +92,7 @@ public:
         index_t index;
         double x,y;
         data >> index >> x >> y;
-        _locations.push_back({x, y});
+        _locations.push_back({index, x, y});
       }
     }
 
@@ -101,7 +102,11 @@ public:
   }
 
   std::vector<std::pair<double, double>> get_locations() const{
-    return _locations;
+    std::vector<std::pair<double, double>> locs;
+    std::transform(_locations.begin(), _locations.end(),
+                   std::back_inserter(locs),
+                   [](const auto& node){return std::make_pair(node.x, node.y);});
+    return locs;
   }
 
   void get_route(const std::list<index_t>& tour,
@@ -111,8 +116,8 @@ public:
     for(auto const& step: tour){
       route_array
         .PushBack(rapidjson::Value(rapidjson::kArrayType)
-                  .PushBack(_locations[step].first, allocator)
-                  .PushBack(_locations[step].second, allocator),
+                  .PushBack(_locations[step].x, allocator)
+                  .PushBack(_locations[step].y, allocator),
                   allocator);
     }
     value.Swap(route_array);
@@ -123,8 +128,9 @@ public:
                 rapidjson::Document::AllocatorType& allocator) const{
     rapidjson::Value tour_array(rapidjson::kArrayType);
     for(auto const& step: tour){
-      // Using input index to describe locations.
-      tour_array.PushBack(step, allocator);
+      // Using input index to describe locations for lon_lat syntax
+      // and index provided in tsplib file.
+      tour_array.PushBack(_locations[step].index, allocator);
     }
     value.Swap(tour_array);
   }
