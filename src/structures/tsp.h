@@ -17,12 +17,11 @@ All rights reserved (see LICENSE).
 #include "./typedefs.h"
 #include "./matrix.h"
 #include "./undirected_graph.h"
-#include "../loaders/problem_io.h"
 #include "../loaders/euclidean.h"
 
 class tsp{
 protected:
-  std::unique_ptr<problem_io<distance_t>> _loader;
+  euclidean _loader;
   matrix<distance_t> _matrix;
   undirected_graph<distance_t> _symmetrized_graph;
   const cl_args_t _cl_args;
@@ -43,8 +42,8 @@ public:
                  rapidjson::Document::AllocatorType& allocator) const;
 
   void get_tour(const std::list<index_t>& tour,
-                 rapidjson::Value& value,
-                 rapidjson::Document::AllocatorType& allocator) const;
+                rapidjson::Value& value,
+                rapidjson::Document::AllocatorType& allocator) const;
 
   void get_route_infos(const std::list<index_t>& tour,
                        rapidjson::Document& output) const;

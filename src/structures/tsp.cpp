@@ -10,15 +10,10 @@ All rights reserved (see LICENSE).
 #include "tsp.h"
 
 tsp::tsp(const cl_args_t& cl_args): 
-  _cl_args(cl_args){
-  
-  // Only use euclidean loader.
-  _loader = std::make_unique<euclidean>(cl_args.input);
-  _matrix = _loader->get_matrix();
-
-  // Compute graph for symmetrized problem.
-  _symmetrized_graph = undirected_graph<distance_t>(_matrix);
-}
+  _loader(cl_args.input),
+  _matrix(_loader.get_locations()),
+  _symmetrized_graph(_matrix),
+  _cl_args(cl_args) {}
 
 const matrix<distance_t>& tsp::get_matrix() const{
   return _matrix;
@@ -57,14 +52,14 @@ void tsp::get_route(const std::list<index_t>& tour,
                     rapidjson::Value& value,
                     rapidjson::Document::AllocatorType& allocator) const{
   assert(tour.size() == _matrix.size());
-  _loader->get_route(tour, value, allocator);
+  _loader.get_route(tour, value, allocator);
 }
 
 void tsp::get_tour(const std::list<index_t>& tour,
                    rapidjson::Value& value,
                    rapidjson::Document::AllocatorType& allocator) const{
   assert(tour.size() == _matrix.size());
-  _loader->get_tour(tour, value, allocator);
+  _loader.get_tour(tour, value, allocator);
 }
 
 void tsp::get_route_infos(const std::list<index_t>& tour,
@@ -74,5 +69,5 @@ void tsp::get_route_infos(const std::list<index_t>& tour,
   // Back to the starting location when the trip is a loop.
   std::list<index_t> actual_trip (tour);
   actual_trip.push_back(actual_trip.front());
-  _loader->get_route_infos(actual_trip, output);
+  _loader.get_route_infos(actual_trip, output);
 }

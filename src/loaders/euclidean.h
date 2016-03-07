@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "../structures/matrix.h"
 #include "../utils/exceptions.h"
 
-class euclidean : public problem_io<distance_t>{
+class euclidean{
 
 private:
   std::vector<std::pair<double, double>> _locations;
@@ -100,13 +100,13 @@ public:
     }
   }
 
-  virtual matrix<distance_t> get_matrix() const override{
-    return matrix<distance_t>(_locations);
+  std::vector<std::pair<double, double>> get_locations() const{
+    return _locations;
   }
 
-  virtual void get_route(const std::list<index_t>& tour,
-                         rapidjson::Value& value,
-                         rapidjson::Document::AllocatorType& allocator) const override{
+  void get_route(const std::list<index_t>& tour,
+                 rapidjson::Value& value,
+                 rapidjson::Document::AllocatorType& allocator) const{
     rapidjson::Value route_array(rapidjson::kArrayType);
     for(auto const& step: tour){
       route_array
@@ -118,9 +118,9 @@ public:
     value.Swap(route_array);
   }
 
-  virtual void get_tour(const std::list<index_t>& tour,
-                        rapidjson::Value& value,
-                        rapidjson::Document::AllocatorType& allocator) const override{
+  void get_tour(const std::list<index_t>& tour,
+                rapidjson::Value& value,
+                rapidjson::Document::AllocatorType& allocator) const{
     rapidjson::Value tour_array(rapidjson::kArrayType);
     for(auto const& step: tour){
       // Using input index to describe locations.
@@ -129,8 +129,8 @@ public:
     value.Swap(tour_array);
   }
 
-  virtual void get_route_infos(const std::list<index_t>& tour,
-                               rapidjson::Document& output) const override{
+  void get_route_infos(const std::list<index_t>& tour,
+                       rapidjson::Document& output) const{
   }
 };
 
