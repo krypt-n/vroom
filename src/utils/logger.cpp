@@ -51,8 +51,7 @@ void logger::write_solution(const tsp& instance,
   output.AddMember("computing_times", c_t, allocator);
 
   // Solution description.
-  std::string route_type 
-    = (_cl_args.force_start or _cl_args.force_end) ? "open": "loop";
+  std::string route_type = "loop";
   output.AddMember("route_type", rapidjson::Value(), allocator);
   output["route_type"].SetString(route_type.c_str(), route_type.size());
 

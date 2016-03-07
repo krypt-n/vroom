@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define EUCLIDEAN_H
 #include <vector>
 #include <regex>
+#include <boost/regex.hpp>
 #include "./problem_io.h"
 #include "../structures/matrix.h"
 #include "../utils/exceptions.h"
@@ -29,7 +30,7 @@ class euclidean : public problem_io<distance_t>{
 private:
   std::vector<std::pair<double, double>> _locations;
 
-  void add_location(const std::string location){
+  void add_lat_lon_location(const std::string location){
     // Regex check for valid location.
     std::regex valid_loc ("loc=-?[0-9]+\\.?[0-9]*,-?[0-9]+\\.?[0-9]*[[:space:]]*");
     if(!std::regex_match(location, valid_loc)){
@@ -48,18 +49,51 @@ private:
   }
   
 public:
-  euclidean(std::string loc_input){
-    // Parsing input in locations.
-    std::size_t start = 0;
-    std::size_t end = loc_input.find("&", start);
-    while(end != std::string::npos){
-      this->add_location(loc_input.substr(start, end - start));
-      start = end + 1;
-      end = loc_input.find("&", start);
+  euclidean(std::string input){
+    bool use_lat_lon_query
+      = (input.find("DIMENSION") == std::string::npos);
+
+    if(use_lat_lon_query){
+    // Parsing input in locations from loc=lon,lat&... format.
+      std::size_t start = 0;
+      std::size_t end = input.find("&", start);
+      while(end != std::string::npos){
+        this->add_lat_lon_location(input.substr(start, end - start));
+        start = end + 1;
+        end = input.find("&", start);
+      }
+      // Adding last element, after last "&".
+      end = input.length();
+      this->add_lat_lon_location(input.substr(start, end - start));
     }
-    // Adding last element, after last "&".
-    end = loc_input.length();
-    this->add_location(loc_input.substr(start, end - start));
+    else{
+      // Use nodes from TSPLIB format (mostly duplicate code from
+      // tsplib_loader).
+
+      // 1. Get problem dimension.
+      boost::regex dim_rgx ("DIMENSION[[:space:]]*:[[:space:]]*([0-9]+)[[:space:]]");
+      boost::smatch dim_match;
+      if(!boost::regex_search(input, dim_match, dim_rgx)){
+        throw custom_exception("Incorrect \"DIMENSION\" key.");
+      }
+      std::size_t dimension = std::stoul(dim_match[1].str());
+    
+      // Looking for a node coord section.
+      boost::regex ews_rgx ("NODE_COORD_SECTION[[:space:]]*(.+)[[:space:]]*(EOF)?");
+      boost::smatch ews_match;
+      if(!boost::regex_search(input, ews_match, ews_rgx)){
+        throw custom_exception("Incorrect \"NODE_COORD_SECTION\".");
+      }
+
+      // Parsing nodes.
+      std::istringstream data (ews_match[1].str());
+      for(std::size_t i = 0; i < dimension; ++i){
+        index_t index;
+        double x,y;
+        data >> index >> x >> y;
+        _locations.push_back({x, y});
+      }
+    }
 
     if(_locations.size() <= 1){
       throw custom_exception("at least two locations required!");
