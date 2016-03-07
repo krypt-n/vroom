@@ -10,7 +10,6 @@ All rights reserved (see LICENSE).
 #include "tsp.h"
 
 tsp::tsp(const cl_args_t& cl_args): 
-  _matrix(0),
   _cl_args(cl_args){
   
   // Only use euclidean loader.
@@ -72,14 +71,8 @@ void tsp::get_route_infos(const std::list<index_t>& tour,
                           rapidjson::Document& output) const{
   assert(tour.size() == _matrix.size());
 
-  if(_cl_args.force_start or _cl_args.force_end){
-    // Open tour, getting direct geometry.
-    _loader->get_route_infos(tour, output);
-  }
-  else{
-    // Back to the starting location when the trip is a loop.
-    std::list<index_t> actual_trip (tour);
-    actual_trip.push_back(actual_trip.front());
-    _loader->get_route_infos(actual_trip, output);
-  }
+  // Back to the starting location when the trip is a loop.
+  std::list<index_t> actual_trip (tour);
+  actual_trip.push_back(actual_trip.front());
+  _loader->get_route_infos(actual_trip, output);
 }

@@ -27,8 +27,6 @@ void display_usage(){
   usage += "\t-g,\t\t get detailed route geometry for the solution\n";
   usage += "\t-i=FILE,\t read input from FILE rather than from\n\t\t\t command-line\n";
   usage += "\t-o=OUTPUT,\t output file name\n";
-  usage += "\t-s,\t\t compute an \"open\" route (not a tour), starting at\n\t\t\t the first input location\n";
-  usage += "\t-e,\t\t compute an \"open\" route (not a tour), ending at\n\t\t\t the last input location\n";
   usage += "\t-t,\t\t number of threads to use\n";
   usage += "\t-v,\t\t turn on verbose output\n";
   usage += "\t-V,\t\t turn on verbose output with all details";
@@ -53,9 +51,6 @@ int main(int argc, char **argv){
     case 'a':
       cl_args.osrm_address = optarg;
       break;
-    case 'e':
-      cl_args.force_end = true;
-      break;
     case 'g':
       cl_args.geometry = true;
       break;
@@ -70,9 +65,6 @@ int main(int argc, char **argv){
       break;
     case 'p':
       cl_args.osrm_port = optarg;
-      break;
-    case 's':
-      cl_args.force_start = true;
       break;
     case 't':
       try{
@@ -117,7 +109,7 @@ int main(int argc, char **argv){
     ->set_filter(boost::log::trivial::severity >= cl_args.log_level);
   
   try{
-    solve_atsp(cl_args);
+    solve_symmetric_tsp(cl_args);
   }
   catch(const custom_exception& e){
     BOOST_LOG_TRIVIAL(error) << "[Error] " << e.get_message();

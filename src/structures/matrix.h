@@ -69,10 +69,6 @@ class matrix{
                    [this](index_t i) {return _locations[i];});
     return matrix<T>(new_locations);
   }
-
-  bool is_symmetric() const{
-    return true;
-  }
 };
 
 #endif

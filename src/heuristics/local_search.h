@@ -22,7 +22,6 @@ All rights reserved (see LICENSE).
 class local_search{
 private:
   const matrix<distance_t>& _matrix;
-  const bool _is_symmetric_matrix;
   std::vector<index_t> _edges;
   unsigned _nb_threads;
   std::vector<index_t> _rank_limits;
@@ -30,7 +29,6 @@ private:
 
 public:
   local_search(const matrix<distance_t>& matrix,
-               bool is_symmetric_matrix,
                const std::list<index_t>& tour,
                unsigned nb_threads);
 
@@ -38,17 +36,9 @@ public:
 
   distance_t perform_all_relocate_steps();
 
-  distance_t avoid_loop_step();
-
-  distance_t perform_all_avoid_loop_steps();
-
   distance_t two_opt_step();
 
-  distance_t asym_two_opt_step();
-
   distance_t perform_all_two_opt_steps();
-
-  distance_t perform_all_asym_two_opt_steps();
 
   distance_t or_opt_step();
 

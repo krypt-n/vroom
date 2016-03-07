@@ -95,7 +95,7 @@ std::list<index_t> christo_heuristic::build_solution(const tsp& instance){
     if(already_added.find(first_index) == already_added.end()){
       eulerian_graph_edges.emplace_back(first_index,
                                         second_index,
-                                        instance.get_symmetrized_matrix()[first_index][second_index]
+                                        instance.get_matrix()[first_index][second_index]
                                         );
       already_added.insert(second_index);
     }

@@ -20,6 +20,6 @@ All rights reserved (see LICENSE).
 #include "./local_search.h"
 #include "../utils/logger.h"
 
-void solve_atsp(const cl_args_t& cl_args);
+void solve_symmetric_tsp(const cl_args_t& cl_args);
 
 #endif
