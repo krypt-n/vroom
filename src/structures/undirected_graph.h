@@ -34,8 +34,9 @@ public:
     for(index_t i = 0; i < _size; ++i){
       for(index_t j = i + 1; j < _size; ++j){
         _edges.emplace_back(i, j, m[i][j]);
-        _adjacency_list[i].push_back(j);
-        _adjacency_list[j].push_back(i);
+        // Not updating adjacency list to spare memory and time, as it
+        // is never used with a complete graph (see assert in
+        // get_adjacency_list()).
       }
     }
   }
@@ -61,6 +62,9 @@ public:
   }
 
   std::unordered_map<index_t, std::list<index_t>> get_adjacency_list() const{
+    // Only meaningful if the graph has been built with the edges
+    // constructor, not the matrix.
+    assert(_adjacency_list.size() > 0);
     return _adjacency_list;
   }
 };
