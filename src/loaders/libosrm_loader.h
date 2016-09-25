@@ -18,6 +18,7 @@ All rights reserved (see LICENSE).
 #include "osrm/coordinate.hpp"
 #include "osrm/engine_config.hpp"
 #include "osrm/json_container.hpp"
+#include "osrm/engine/hint.hpp"
 
 #include "osrm/status.hpp"
 #include "osrm/osrm.hpp"
@@ -102,6 +103,13 @@ public:
 
     check_unfound(nb_unfound_from_loc, nb_unfound_to_loc);
 
+    // Store OSRM hints for locations to speed-up the next route
+    // request.
+    auto& sources = result.values["sources"].get<osrm::json::Array>();
+    for(std::size_t i = 0; i < m_size; ++i){
+      _locations[i].hint = sources.values.at(i).get<osrm::json::Object>().values["hint"].get<osrm::json::String>().value;
+    }
+
     return m;
   }
 
@@ -120,6 +128,7 @@ public:
     for(auto& step: steps){
       params.coordinates.push_back({osrm::util::FloatLongitude(_locations[step].lon),
             osrm::util::FloatLatitude(_locations[step].lat)});
+      params.hints.push_back(osrm::engine::Hint::FromBase64(_locations[step].hint));
     }
 
     osrm::json::Object result;
