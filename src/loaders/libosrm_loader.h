@@ -38,6 +38,7 @@ class libosrm_loader : public osrm_loader{
 private:
   const osrm::EngineConfig _config;
   const S _s;
+  std::vector<osrm::engine::Hint> _hints;
 
 public:
   libosrm_loader(const std::string& osrm_profile,
@@ -107,7 +108,7 @@ public:
     // request.
     auto& sources = result.values["sources"].get<osrm::json::Array>();
     for(std::size_t i = 0; i < m_size; ++i){
-      _locations[i].hint = sources.values.at(i).get<osrm::json::Object>().values["hint"].get<osrm::json::String>().value;
+      _hints.push_back(osrm::engine::Hint::FromBase64(sources.values.at(i).get<osrm::json::Object>().values["hint"].get<osrm::json::String>().value));
     }
 
     return m;
@@ -128,7 +129,7 @@ public:
     for(auto& step: steps){
       params.coordinates.push_back({osrm::util::FloatLongitude(_locations[step].lon),
             osrm::util::FloatLatitude(_locations[step].lat)});
-      params.hints.push_back(osrm::engine::Hint::FromBase64(_locations[step].hint));
+      params.hints.push_back(_hints[step]);
     }
 
     osrm::json::Object result;

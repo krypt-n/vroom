@@ -27,7 +27,6 @@ protected:
     double lon;
     double lat;
     index_t job_id;
-    std::string hint;
   };
 
   const std::string _osrm_profile; // OSRM profile name
@@ -44,7 +43,7 @@ protected:
        or !location[1].IsNumber()){
       throw custom_exception("Invalid input location");
     }
-    _locations.push_back({type, location[0].GetDouble(), location[1].GetDouble(), job_id, ""});
+    _locations.push_back({type, location[0].GetDouble(), location[1].GetDouble(), job_id});
   }
 
   osrm_loader(const std::string& osrm_profile,
