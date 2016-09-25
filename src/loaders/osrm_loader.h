@@ -21,8 +21,14 @@ All rights reserved (see LICENSE).
 class osrm_loader : public problem_io<distance_t>{
 
 protected:
-  enum class LOC_TYPE {START, END, JOB};
-  struct Location {LOC_TYPE type; double lon; double lat; index_t job_id;};
+  enum class LOC_TYPE{START, END, JOB};
+  struct Location{
+    LOC_TYPE type;
+    double lon;
+    double lat;
+    index_t job_id;
+    std::string hint;
+  };
 
   const std::string _osrm_profile; // OSRM profile name
   std::vector<Location> _locations;
@@ -38,7 +44,7 @@ protected:
        or !location[1].IsNumber()){
       throw custom_exception("Invalid input location");
     }
-    _locations.push_back({type, location[0].GetDouble(), location[1].GetDouble(), job_id});
+    _locations.push_back({type, location[0].GetDouble(), location[1].GetDouble(), job_id, ""});
   }
 
   osrm_loader(const std::string& osrm_profile,
@@ -123,7 +129,7 @@ protected:
     }
   }
 
-  virtual matrix<distance_t> get_matrix() const = 0;
+  virtual matrix<distance_t> get_matrix() = 0;
 
   inline void add_json_step(index_t step_id,
                             std::string type,

@@ -96,7 +96,7 @@ public:
     _address(address),
     _port(port) {}
 
-  virtual matrix<distance_t> get_matrix() const override{
+  virtual matrix<distance_t> get_matrix() override{
     std::string query = this->build_query(_locations, "table");
 
     std::string response = this->send_then_receive(query);
@@ -143,6 +143,12 @@ public:
 
     check_unfound(nb_unfound_from_loc, nb_unfound_to_loc);
 
+    // Store OSRM hints for locations to speed-up the next route
+    // request.
+    for(rapidjson::SizeType i = 0; i < infos["sources"].Size(); ++i){
+      _locations[i].hint = infos["sources"][i]["hint"].GetString();
+    }
+
     return m;
   }
 
@@ -156,6 +162,13 @@ public:
     }
 
     std::string extra_args = "alternatives=false&steps=false&overview=full&continue_straight=false";
+
+    // Adding OSRM hints.
+    extra_args += "&hints=";
+    for(auto const& location: _locations){
+      extra_args += location.hint + ";";
+    }
+    extra_args.pop_back();      // Remove trailing ";".
 
     std::string query = this->build_query(ordered_locations,
                                           "route",

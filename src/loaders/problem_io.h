@@ -19,7 +19,7 @@ template <class T>
 class problem_io{
 
 public:
-  virtual matrix<T> get_matrix() const = 0;
+  virtual matrix<T> get_matrix() = 0;
 
   virtual void get_steps(const std::list<index_t>& steps,
                          rapidjson::Value& value,

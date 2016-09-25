@@ -263,7 +263,7 @@ public:
     }
   }
 
-  virtual matrix<distance_t> get_matrix() const override{
+  virtual matrix<distance_t> get_matrix() override{
     matrix<distance_t> m {_dimension};
 
     std::istringstream data (_data_section);

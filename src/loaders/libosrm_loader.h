@@ -45,7 +45,7 @@ public:
     _config(),
     _s(_config){}
 
-  virtual matrix<distance_t> get_matrix() const override{
+  virtual matrix<distance_t> get_matrix() override{
     osrm::TableParameters params;
     for(auto const& location: _locations){
       params.coordinates.push_back({osrm::util::FloatLongitude(location.lon),
